@@ -165,3 +165,97 @@ datos_television_limpios_final <- datos_television_transformar_fecha |>
   mutate(year_added = year(fecha_agregacion)) |> 
   mutate(month_added = month(fecha_agregacion))
 ```
+
+Una vez que haya terminado la limpieza anterior, responda las siguientes preguntas:
+
+i. Cuántas películas y shows de TV hay por país? (4pts)
+
+```{r}
+peliculas_shows_pais <- datos_television_limpios_final |> 
+  group_by(pais) |> 
+  summarise(tipos = n())
+```
+
+j. Cuáles son los 10 directores con mayor cantidad de películas (sin contar shows de TV) en Netflix?
+Ordénelos por orden descendente. (4pts)
+
+```{r}
+directores_sin_tv_shows <- datos_television_limpios_final |> 
+  filter(tipo == "Movie")
+```
+344y3herhe5h 
+```{r}
+top_10_directores <- directores_sin_tv_shows |> 
+  group_by(director) |> 
+  summarise(titulos = n()) |> 
+  arrange(desc(titulos))
+```
+
+```{r}
+print(top_10_directores)
+```
+
+Sin información 173
+
+2 Rajiv Chilaka 19
+3 Ra�l Campos, Jan Suter 18
+4 Suhas Kadav 16
+5 Marcus Raboy 15
+6 Jay Karas 14
+7 Cathy Garcia-Molina 13
+8 Jay Chapman 12
+9 Martin Scorsese 12
+10 Youssef Chahine 12
+11 Steven Spielberg 11
+
+La cantidad de filas sin informacionn en el campo de director eran las que mas se repetian, despues de "sin informacion los datos siguientes serian el top 10 de directores con mas peliculas.
+
+k. Cuáles son los 10 directores con mayor cantidad de shows de TV (sin contar películas) en Netflix?
+Ordénelos por orden descendente. (4pts)
+
+```{r}
+directores_sin_peliculas <- datos_television_limpios_final |> 
+  filter(tipo == "TV Show")
+```
+
+```{r}
+top_10_directores_tv_shows <- directores_sin_peliculas |> 
+  group_by(director) |> 
+  summarise(titulos = n()) |> 
+  arrange(desc(titulos))
+```
+
+```{r}
+print(top_10_directores_tv_shows)
+```
+
+
+1 Sin información 2415
+
+2 Alastair Fothergill 14
+3 Mark Thornton, Todd Kauffman 5
+4 Stan Lathan 3
+5 Hsu Fu-chun 2
+6 Iginio Straffi 2
+7 Ken Burns 2
+8 Rob Seidenglanz 2
+9 Shin Won-ho 2
+10 Adrien Lagier, Ousmane Ly 1
+11 Adri�n Garc�a Bogliano 1
+
+La cantidad de filas sin informacionn en el campo de director eran las que mas se repetian, despues de "sin informacion los datos siguientes serian el top 10 de directores con mas TV Shows.
+
+l. Obtenga la lista de películas y shows de TV que se añadieron en marzo del año 2020. Cuántos fueron?
+(4pts)
+
+En el siguiente chunk por medio de la siguiente formula se despliega la formula.
+
+```{r}
+peliculas_anadidas_marzo_2020 <- datos_television_limpios_final |> 
+  filter(month_added == "3" & year_added == "2020") |> 
+  select(tipo, titulo, month_added, year_added)
+```
+
+```{r}
+print(peliculas_anadidas_marzo_2020)
+```
