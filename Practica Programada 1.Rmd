@@ -1,0 +1,167 @@
+---
+title: "Practica programada 1"
+author: "Rebeca Rodriguez Solano"
+date: "2023-07-07"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(readr)
+library(readxl)
+library(tidyr)
+library(janitor) 
+library(lubridate)
+library(hms)
+library(stringr)
+```
+
+
+
+Práctica programada 1: Preparación y limpieza de datos
+
+La presente práctica programada deberá resolverse de manera individual utilizando control de versiones (git),
+github y RStudio.
+
+Puede utilizar su repositorio de github llamado “mi_primer_repo” que creamos durante clase, o si gusta
+puede crear otro para este propósito (si decide crear uno nuevo, recuerde que debe realizar entonces los pasos
+de clonarlo en su computadora local y autentificarse como aprendimos en clase).
+
+Recuerde crear al menos el tiquete correspondiente a la resolución de la práctica programada 1, trabajar
+bajo la rama correspondiente y hacer commit y push de manera frecuente. Además, cuando ya tenga lista
+su solución, debe hacer una SF para integrar el código en main.
+
+La manera de entregar la tarea será enviando por google classroom el link al repositorio de github donde fue
+resuelta la práctica programada.
+
+
+Instrucciones:
+
+
+a. Cree un archivo Rmarkdown para resolver esta práctica programada. En el chunk de setup cargue las
+librerías que considere necesarias para resolver la práctica. Los datos para trabajar puede cargarlos con
+la función read_csv2 de readr directamente de la siguiente dirección: “https://raw.githubusercontent.
+com/isa229/programacion_analisis_datos_ii/main/netflix_info.csv” (1pto)
+
+```{r}
+datos_television <- read_csv2("https://raw.githubusercontent.com/isa229/programacion_analisis_datos_ii/main/netflix_info.csv")
+```
+
+b. Ajuste los nombres de las columnas para que estén en español. (2pts)
+
+```{r}
+datos_television_limpios <- datos_television |> 
+  rename("id" = "show_id",
+         "tipo" = "type",
+         "titulo" = "title", 
+         "pais" = "country",
+         "fecha_agregacion" = "date_added",
+         "ano_lanzamiento" = "release_year",
+         "clasificacion" = "rating",
+         "duracion" = "duration",
+         "generos_abarcados" = "listed_in")
+```
+
+c. Elimine filas duplicadas. (2pts)
+
+```{r}
+filas_duplicadas_datos_television <- datos_television_limpios |>  
+  janitor::get_dupes()
+ 
+filas_duplicadas_distintas <- filas_duplicadas_datos_television |> 
+    distinct()
+```
+
+```{r}
+datos_television_sin_duplicados <- datos_television_limpios |> 
+  distinct()
+```
+
+d. Elimine filas y columnas vacías. (2pts)
+
+```{r}
+datos_television_sin_vacios <- datos_television_sin_duplicados |> 
+  remove_empty(which = c("rows", "cols"))  
+```
+
+e. Elimine la variable correspondiente al año de lanzamiento (release_year.) (2pts)
+
+```{r}
+datos_sin_ano_de_lanzamiento <- datos_television_sin_vacios |> 
+  select(-ano_lanzamiento)
+```
+
+f. Haga una inspección de las variables type y country para determinar si hay observaciones mal escritas o
+escritas de diferentes maneras. Si es ahí, haga la limpieza para poder homogenizar esos datos. (10pts)
+
+```{r}
+pais <- datos_sin_ano_de_lanzamiento |> 
+  select(pais) |> 
+  distinct()
+```
+
+```{r}
+datos_limpios_0 <- datos_sin_ano_de_lanzamiento |> 
+  mutate_at(vars(pais), ~ifelse(. == "united states", "United States", .)) |> 
+  mutate_at(vars(pais), ~ifelse(. == "canada", "Canada", .)) |>
+  mutate_at(vars(pais), ~ifelse(. == "india", "India", .)) |> 
+  mutate_at(vars(pais), ~ifelse(. == "pakistan", "Pakistan", .))
+```
+
+```{r}
+pais2 <- datos_limpios_0|> 
+  select(pais) |> 
+  distinct()
+```
+
+```{r}
+tipo <- datos_sin_ano_de_lanzamiento |> 
+  select(tipo) |> 
+  distinct()
+```
+
+```{r}
+datos_limpios_1 <- datos_limpios_0 |> 
+  mutate_at(vars(tipo), ~ifelse(. == "tv show", "TV Show", .)) |> 
+  mutate_at(vars(tipo), ~ifelse(. == "movie", "Movie", .)) |>
+  mutate_at(vars(tipo), ~ifelse(. == "Movi", "Movie", .))
+```
+
+```{r}
+tipo2 <- datos_limpios_1 |> 
+  select(tipo) |> 
+  distinct()
+```
+
+g. Para todas las columnas de tipo carácter, en donde haya NA, coloque “Sin información”. (4pts)
+
+```{r}
+glimpse(datos_limpios_1)
+```
+
+```{r}
+datos_television_limpios_sin_na <- datos_limpios_1 |> 
+  mutate_at(vars(id, tipo,titulo, director,pais, fecha_agregacion,, clasificacion, duracion, generos_abarcados), ~ifelse(is.na(.), "Sin información", .))
+```
+
+h. Añada a su conjunto de datos una nueva columna llamada anyo que indique el año en que el show o
+película fue añadido a Netflix. Añada también una columna llamada mes que indique el mes en que el
+show o película fue añadido a Netflix. (6pts)
+
+```{r}
+datos_television_transformar_fecha <- datos_television_limpios_sin_na |> 
+  mutate(fecha_agregacion = mdy(fecha_agregacion))
+```
+
+```{r}
+glimpse(datos_television_transformar_fecha)
+```
+
+```{r}
+datos_television_limpios_final <- datos_television_transformar_fecha |> 
+  mutate(year_added = year(fecha_agregacion)) |> 
+  mutate(month_added = month(fecha_agregacion))
+```
