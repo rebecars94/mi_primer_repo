@@ -156,10 +156,56 @@ mapa_top_10
 f. Escriba el código que exporte los datos en un excel, de tal manera que cada pestaña tenga solamente los datos de una categoría de AQI. (Es decir una pestaña para las ciudades cuya categoría es “Good” o “Buena”, otra para los que la categoría es “Moderate” y así para cada cateoría). (5pts) 
 
 ```{r}
-datos_aire_final_espanol <- datos_aire_agrupados_espanol |> 
+datos_aire_sin_agrupar_espanol <- datos_aire |> 
+  mutate(`AQI Category`= recode(`AQI Category`,
+                                "Good"="Bueno",
+                                "Hazardous"="Peligroso",
+                                "Moderate"="Moderado",
+                                "Unhealthy"="No saludable",
+                                "Unhealthy for Sensitive Groups"="No saludable para grupos sensibles",
+                                "Very Unhealthy"="Muy poco saludable"))
+        
+```
+
+```{r}
+datos_aire_bueno <- datos_aire_sin_agrupar_espanol |> 
   filter(`AQI Category` == "Bueno")
-  
-  
+```
+
+```{r}
+datos_aire_peligroso <- datos_aire_sin_agrupar_espanol |> 
+  filter(`AQI Category` == "Peligroso")
+```
+
+```{r}
+datos_aire_moderado <- datos_aire_sin_agrupar_espanol |> 
+  filter(`AQI Category` == "Moderado")
+```
+
+```{r}
+datos_aire_no_saludable <- datos_aire_sin_agrupar_espanol |> 
+  filter(`AQI Category` == "No saludable")
+```
+
+```{r}
+datos_aire_no_saludable_para_grupos_sensibles <- datos_aire_sin_agrupar_espanol |> 
+  filter(`AQI Category` == "No saludable para grupos sensibles")
+```
+
+```{r}
+datos_aire_muy_poco_saludable <- datos_aire_sin_agrupar_espanol |> 
+  filter(`AQI Category` == "Muy poco saludable")
+```
+
+```{r}
+datos_aire_final <- list("Bueno" = datos_aire_bueno,
+                      "Peligroso" = datos_aire_peligroso,
+                      "Moderado" = datos_aire_moderado,
+                      "No saludable" = datos_aire_no_saludable,
+                      "No saludable para grupos sensibles" = datos_aire_no_saludable_para_grupos_sensibles,
+                      "Muy poco saludable" = datos_aire_muy_poco_saludable)
+
+write_xlsx(datos_aire_final, path = "datos/datos_aire_final.xlsx")
 ```
 
 
