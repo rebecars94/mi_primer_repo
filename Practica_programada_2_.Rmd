@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(leaflet)
 library(readr)
 library(readxl)
+library(writexl)
 library(dplyr)
 library(janitor)
 library(stringr)
@@ -84,7 +85,7 @@ d. Obtenga el promedio del AQI Value por país, y cree 2 tablas: Una que muestre
 ```{r}
 datos_AQI_value_pais  <- datos_aire |>
   group_by(Country) |> 
-  summarize(promedio_AQI_value_pais = mean(`AQI Value`))
+  summarize(promedio_AQI_value_pais = mean(`AQI Value`)) 
 ```
 
 ```{r}
@@ -134,13 +135,31 @@ paises_10_valores_altos_gt
 e. Para los 10 países con los valores promedios más altos de AQI, muestrelos en un mapa de leaflet usando addMarkers o un addCircles. En el popup debe colocar el valor promedio del AQI. (6pts) 
 
 ```{r}
+paises_10_valores_altos_lat_lon <- paises_10_valores_altos |> 
+  mutate(latitude = c(35.907757, 25.930414, 30.375321, 23.885942, 21.00789, 
+                  25.354826, 23.424076, 12.52111, 29.31166, 21.512583)) |> 
+  mutate(longitude = c(127.766922, 50.637772, 69.345116, 45.079162, -10.940835, 
+                  51.183884, 53.847818, -69.968338, 47.481766, 55.923255)) 
+```
 
+
+ 
+```{r}
+mapa_top_10 <- paises_10_valores_altos_lat_lon |> 
+  leaflet() |> 
+  addTiles() |> 
+  addMarkers(lng = ~longitude, lat = ~latitude, popup = ~Country) 
+
+mapa_top_10
 ```
 
 f. Escriba el código que exporte los datos en un excel, de tal manera que cada pestaña tenga solamente los datos de una categoría de AQI. (Es decir una pestaña para las ciudades cuya categoría es “Good” o “Buena”, otra para los que la categoría es “Moderate” y así para cada cateoría). (5pts) 
 
 ```{r}
-
+datos_aire_final_espanol <- datos_aire_agrupados_espanol |> 
+  filter(`AQI Category` == "Bueno")
+  
+  
 ```
 
 
